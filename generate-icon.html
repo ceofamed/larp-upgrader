@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head><title>Icon Generator</title></head>
+<body>
+<canvas id="c" width="128" height="128"></canvas>
+<script>
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+
+// Background gradient
+const grad = ctx.createLinearGradient(0, 0, 128, 128);
+grad.addColorStop(0, '#6c63ff');
+grad.addColorStop(1, '#e91e63');
+ctx.fillStyle = grad;
+ctx.beginPath();
+ctx.roundRect(0, 0, 128, 128, 24);
+ctx.fill();
+
+// Text
+ctx.fillStyle = 'white';
+ctx.font = 'bold 38px Arial Black';
+ctx.textAlign = 'center';
+ctx.fillText('UP', 64, 52);
+
+ctx.font = 'bold 24px Arial Black';
+ctx.fillText('CUSTOM', 64, 82);
+
+// Arrow
+ctx.beginPath();
+ctx.moveTo(64, 90);
+ctx.lineTo(54, 106);
+ctx.lineTo(74, 106);
+ctx.closePath();
+ctx.fill();
+
+// Download
+const link = document.createElement('a');
+link.download = 'icon.png';
+link.href = canvas.toDataURL('image/png');
+link.click();
+</script>
+</body>
+</html>

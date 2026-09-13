@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      width: 340px;
+      max-height: 480px;
+      overflow-y: auto;
+      background: #1a1a2e;
+      color: #eee;
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+      font-size: 13px;
+    }
+    body::-webkit-scrollbar { width: 5px; }
+    body::-webkit-scrollbar-thumb { background: #6c63ff; border-radius: 3px; }
+
+    .header {
+      background: linear-gradient(135deg, #6c63ff, #e91e63);
+      padding: 14px 16px;
+      text-align: center;
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .content { padding: 14px; }
+
+    label {
+      display: block;
+      margin-bottom: 4px;
+      color: #aaa;
+      font-size: 11px;
+      text-transform: uppercase;
+    }
+
+    input[type="number"], input[type="text"] {
+      width: 100%;
+      padding: 9px 12px;
+      border: 1px solid #333;
+      border-radius: 6px;
+      background: #0f3460;
+      color: #fff;
+      font-size: 13px;
+      margin-bottom: 10px;
+      outline: none;
+    }
+
+    input:focus { border-color: #6c63ff; }
+
+    .btn {
+      width: 100%;
+      padding: 10px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 13px;
+      margin-bottom: 6px;
+      font-family: inherit;
+    }
+
+    .btn-primary { background: linear-gradient(135deg, #6c63ff, #5a52d5); color: #fff; }
+    .btn-success { background: linear-gradient(135deg, #00c853, #009624); color: #fff; }
+    .btn-danger { background: linear-gradient(135deg, #e91e63, #c2185b); color: #fff; }
+    .btn:hover { opacity: .85; }
+
+    .row { display: flex; gap: 6px; }
+    .row > * { flex: 1; }
+
+    .stat {
+      background: #16213e;
+      border-radius: 8px;
+      padding: 14px;
+      text-align: center;
+      margin-bottom: 12px;
+    }
+    .stat .val { font-size: 24px; font-weight: 700; color: #6c63ff; }
+    .stat .lbl { font-size: 10px; color: #888; text-transform: uppercase; }
+
+    .hint {
+      margin-top: 12px;
+      padding: 10px;
+      background: #16213e;
+      border-radius: 8px;
+      color: #666;
+      font-size: 11px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">UC Extension</div>
+  <div class="content">
+    <div class="stat">
+      <div class="val" id="p-bal">0.00 \u20BD</div>
+      <div class="lbl">Balance on site</div>
+    </div>
+    <div class="stat">
+      <div class="val" id="inv-count">0 items</div>
+      <div class="lbl">Custom inventory</div>
+    </div>
+
+    <label>Set balance</label>
+    <input type="number" id="bal-input" placeholder="99999">
+
+    <div class="row">
+      <button class="btn btn-primary" id="set-bal">Set</button>
+      <button class="btn btn-danger" id="reset-bal">Reset</button>
+    </div>
+
+    <label style="margin-top:8px">Quick</label>
+    <div class="row">
+      <button class="btn btn-primary qb" data-a="1000">1K</button>
+      <button class="btn btn-primary qb" data-a="10000">10K</button>
+      <button class="btn btn-primary qb" data-a="100000">100K</button>
+      <button class="btn btn-primary qb" data-a="1000000">1M</button>
+    </div>
+
+    <div class="hint">
+      Open the skin catalog on the site via the floating UC Panel.
+      All changes are visible directly on upgrader.vip
+    </div>
+  </div>
+
+  <script>
+    function fmt(p) { return parseFloat(p).toFixed(2) + ' \u20BD'; }
+
+    function refresh() {
+      chrome.tabs.query({active:true, currentWindow:true}, function(tabs) {
+        if (!tabs[0]) return;
+        chrome.tabs.sendMessage(tabs[0].id, {type:'UC_GET_STATE'}, function(resp) {
+          if (resp) {
+            document.getElementById('p-bal').textContent = fmt(resp.bal);
+            document.getElementById('inv-count').textContent = resp.invCount + ' items';
+          }
+        });
+      });
+    }
+
+    function sendMsg(msg) {
+      chrome.tabs.query({active:true, currentWindow:true}, function(tabs) {
+        if (!tabs[0]) return;
+        chrome.tabs.sendMessage(tabs[0].id, msg, function() { refresh(); });
+      });
+    }
+
+    document.getElementById('set-bal').addEventListener('click', function() {
+      var v = parseFloat(document.getElementById('bal-input').value);
+      if (!isNaN(v) && v >= 0) sendMsg({type:'UC_SET_BALANCE', balance: v});
+    });
+
+    document.getElementById('reset-bal').addEventListener('click', function() {
+      sendMsg({type:'UC_SET_BALANCE', balance: 0});
+      document.getElementById('bal-input').value = '';
+    });
+
+    document.querySelectorAll('.qb').forEach(function(b) {
+      b.addEventListener('click', function() { sendMsg({type:'UC_SET_BALANCE', balance: parseFloat(b.dataset.a)}); });
+    });
+
+    refresh();
+  </script>
+</body>
+</html>

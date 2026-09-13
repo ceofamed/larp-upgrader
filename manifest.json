@@ -1,0 +1,24 @@
+{
+  "manifest_version": 3,
+  "name": "Upgrader Custom - Local",
+  "version": "1.0",
+  "description": "Локальная кастомизация upgrader.vip — свой баланс, скины, апгрейды. Ничего не уходит на сервер.",
+  "permissions": ["storage", "activeTab"],
+  "host_permissions": ["https://upgrader.vip/*"],
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://upgrader.vip/*"],
+      "js": ["main.js"],
+      "run_at": "document_start",
+      "world": "MAIN"
+    },
+    {
+      "matches": ["https://upgrader.vip/*"],
+      "js": ["bridge.js"],
+      "run_at": "document_start"
+    }
+  ]
+}
